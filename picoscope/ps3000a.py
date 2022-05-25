@@ -179,14 +179,13 @@ class PS3000a(_PicoscopeBase):
         self.checkResult(m)
 
     def _lowLevelEnumerateUnits(self):
-        count = c_int16(0)
-        m = self.lib.ps3000aEnumerateUnits(byref(count), None, None)
-        self.checkResult(m)
-        # a serial number is rouhgly 8 characters
-        # an extra character for the comma
-        # and an extra one for the space after the comma?
-        # the extra two also work for the null termination
-        serialLth = c_int16(count.value * (8 + 2))
+        count = c_int16(0)       
+        # For the PicoScope 3000a, the EnumerateUnits function, all
+        # parameters are required to be set to non-NULL pointers. It is
+        # not possible to get the number of serial numbers without providing
+        # the buffer for storing the list of serial numbers. Thus, we provide
+        # a buffer and hope it is large enough.
+        serialLth = c_int16(512)
         serials = create_string_buffer(serialLth.value + 1)
 
         m = self.lib.ps3000aEnumerateUnits(byref(count), serials,
